@@ -9,13 +9,18 @@ import time
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 face_cascade = cv2.CascadeClassifier('Cascades/haarcascade_frontalface_default.xml')
 recognizer = cv2.face.LBPHFaceRecognizer_create()
+current_id = 0
+label_ids = {}
+y_labels = []
+x_train = []
+current_file = 0
 
 
 # A thread to continuously train a new data-set each x seconds
 def create_unknown_thread():
     while True:
         print("Training unknown data set")
-        traindataset()
+        traindataset(current_id)
         time.sleep(20)
 
 
@@ -24,7 +29,7 @@ def start_thread():
 
 
 # Train data-set with name and in path
-def traindataset():
+def traindataset(curr_id):
     image_dir = os.path.join(BASE_DIR, "Unknown")
     print("Training new data set from images in : " + image_dir)
     for root, dirs, files in os.walk(image_dir):
@@ -34,8 +39,8 @@ def traindataset():
                 label = os.path.basename(root).replace(" ", "-").lower()
                 # print(label, path)
                 if not label in label_ids:
-                    label_ids[label] = current_id
-                    current_id += 1
+                    label_ids[label] = curr_id
+                    curr_id += 1
                 id_ = label_ids[label]
                 # print(label_ids)
                 # y_labels.append(label) # some number
@@ -48,12 +53,10 @@ def traindataset():
                 faces = face_cascade.detectMultiScale(image_array, scaleFactor=1.3, minNeighbors=5)
                 for (x, y, w, h) in faces:
                     roi = image_array[y:y + h, x:x + w]
-                    img_item = (str(id_) + str(current_file) + ".png")
+                    img_item = (str(id_) + "unknown" + ".png")
                     cv2.imwrite(str(root) + "/" + img_item, roi)
                     x_train.append(roi)
                     y_labels.append(id_)
-                    current_file += 1
-
     # print(y_labels)
     # print(x_train)
 
