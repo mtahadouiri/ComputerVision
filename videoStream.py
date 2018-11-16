@@ -24,7 +24,6 @@ with open("pickles/face-labels.pickle", 'rb') as f:
     og_labels = pickle.load(f)
     labels = {v: k for k, v in og_labels.items()}
 
-Trainer.start_thread()
 
 with mss.mss() as sct:
     # Part of the screen to capture
@@ -55,13 +54,14 @@ with mss.mss() as sct:
                 cv2.putText(img, name, (x, y), font, 1, color, stroke, cv2.LINE_AA)
             else:
                 print("Prediction is weird :", conf)
-                color = (0, 255, 255)
+                color = (0, 0, 255)
                 stroke = 2
                 print("Checking if we know this unknown")
                 # Predict with unknown data-set
                 id_, conf = recognizer2.predict(roi_gray)
-                if 4 <= conf <= 75:
-                    color = (0, 0, 255)
+                print("checking if known unknown returned value "+str(conf))
+                if 4 <= conf <= 85:
+                    color = (0, 255, 255)
                     print("We do know this unknown")
                     cv2.putText(img, "Known Unknown", (x, y), font, 1, color, stroke, cv2.LINE_AA)
                 else:
@@ -70,7 +70,7 @@ with mss.mss() as sct:
                     cv2.putText(img, "Who the fuck ?", (x, y), font, 1, color, stroke, cv2.LINE_AA)
                     cv2.imwrite(str(unknown_dir) + "/" + img_item, roi_color)
                     current_id += 1
-                    print("Train new data-set")
+                    Trainer.start_thread()
 
             end_cord_x = x + w
             end_cord_y = y + h
