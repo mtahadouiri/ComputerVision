@@ -18,7 +18,7 @@ recognizer2.read("recognizors/unknownTrainer.yml")
 current_id = 0
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 unknown_dir = os.path.join(BASE_DIR, "Unknown")
-
+use_trainer = False
 labels = {"person_name": 1}
 with open("pickles/face-labels.pickle", 'rb') as f:
     og_labels = pickle.load(f)
@@ -49,7 +49,7 @@ with mss.mss() as sct:
                 # print(5: #id_)
                 # print(labels[id_])
                 name = labels[id_]
-                color = (255, 255, 255)
+                color = (255, 0, 0)
                 stroke = 2
                 cv2.putText(img, name, (x, y), font, 1, color, stroke, cv2.LINE_AA)
             else:
@@ -65,13 +65,13 @@ with mss.mss() as sct:
                     print("We do know this unknown")
                     cv2.putText(img, "Known Unknown", (x, y), font, 1, color, stroke, cv2.LINE_AA)
                 else:
-                    print("adding image to unknown data-set")
-                    img_item = ("Unknown" + str(current_id) + ".png")
-                    cv2.putText(img, "Who the fuck ?", (x, y), font, 1, color, stroke, cv2.LINE_AA)
-                    cv2.imwrite(str(unknown_dir) + "/" + img_item, roi_color)
-                    current_id += 1
-                    Trainer.start_thread()
-
+                    if use_trainer:
+                        print("adding image to unknown data-set")
+                        img_item = ("Unknown" + str(current_id) + ".png")
+                        cv2.putText(img, "Who the fuck ?", (x, y), font, 1, color, stroke, cv2.LINE_AA)
+                        cv2.imwrite(str(unknown_dir) + "/" + img_item, roi_color)
+                        current_id += 1
+                        Trainer.start_thread()
             end_cord_x = x + w
             end_cord_y = y + h
             cv2.rectangle(img, (x, y), (end_cord_x, end_cord_y), color, stroke)
