@@ -5,6 +5,7 @@ import os
 import cv2
 import mss
 import pickle
+import Trainer
 
 face_cascade = cv2.CascadeClassifier('Cascades/haarcascade_frontalface_default.xml')
 color = [255, 0, 0]
@@ -12,6 +13,8 @@ stroke = 2
 font = cv2.FONT_HERSHEY_SIMPLEX
 recognizer = cv2.face.LBPHFaceRecognizer_create()
 recognizer.read("recognizors/faceTrainer.yml")
+recognizer2 = cv2.face.LBPHFaceRecognizer_create()
+recognizer2.read("recognizors/unknownTrainer.yml")
 current_id = 0
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 unknown_dir = os.path.join(BASE_DIR, "Unknown")
@@ -20,6 +23,8 @@ labels = {"person_name": 1}
 with open("pickles/face-labels.pickle", 'rb') as f:
     og_labels = pickle.load(f)
     labels = {v: k for k, v in og_labels.items()}
+
+Trainer.start_thread()
 
 with mss.mss() as sct:
     # Part of the screen to capture
@@ -39,7 +44,8 @@ with mss.mss() as sct:
             roi_gray = gray[y:y + h, x:x + w]  # (ycord_start, ycord_end)
             roi_color = img[y:y + h, x:x + w]
             id_, conf = recognizer.predict(roi_gray)
-            # recognize? deep learned model predict keras tensorflow pytorch scikit learn
+            # recognize? Will use deep learned model predict (keras tensorflow pytorch scikit) in the futur for
+            # better predictions
             if 4 <= conf <= 75:
                 # print(5: #id_)
                 # print(labels[id_])
@@ -51,10 +57,20 @@ with mss.mss() as sct:
                 print("Prediction is weird :", conf)
                 color = (0, 255, 255)
                 stroke = 2
-                cv2.putText(img, "Who the fuck ?", (x, y), font, 1, color, stroke, cv2.LINE_AA)
-                img_item = ("Unknown" + str(current_id) + ".png")
-                cv2.imwrite(str(unknown_dir) + "/" + img_item, roi_color)
-                current_id += 1
+                print("Checking if we know this unknown")
+                # Predict with unknown data-set
+                id_, conf = recognizer2.predict(roi_gray)
+                if 4 <= conf <= 75:
+                    color = (0, 0, 255)
+                    print("We do know this unknown")
+                    cv2.putText(img, "Known Unknown", (x, y), font, 1, color, stroke, cv2.LINE_AA)
+                else:
+                    print("adding image to unknown data-set")
+                    img_item = ("Unknown" + str(current_id) + ".png")
+                    cv2.putText(img, "Who the fuck ?", (x, y), font, 1, color, stroke, cv2.LINE_AA)
+                    cv2.imwrite(str(unknown_dir) + "/" + img_item, roi_color)
+                    current_id += 1
+                    print("Train new data-set")
 
             end_cord_x = x + w
             end_cord_y = y + h
