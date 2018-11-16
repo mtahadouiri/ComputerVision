@@ -13,7 +13,7 @@ recognizer = cv2.face.LBPHFaceRecognizer_create()
 
 # A thread to continuously train a new data-set each x seconds
 def create_unknown_thread():
-    while true:
+    while True:
         print("Training unknown data set")
         traindataset()
         time.sleep(20)
