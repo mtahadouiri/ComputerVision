@@ -19,6 +19,7 @@ current_file = 0
 # A thread to continuously train a new data-set each x seconds
 def create_unknown_thread():
     while True:
+        time.sleep(60)
         print("Training unknown data set")
         traindataset(current_id)
         time.sleep(20)

@@ -20,9 +20,7 @@ with open("pickles/face-labels.pickle", 'rb') as f:
     og_labels = pickle.load(f)
     labels = {v: k for k, v in og_labels.items()}
 
-# Web-cam Capture
-cap = cv2.VideoCapture(0)
-
+Trainer.start_thread()
 # Screen capture
 with mss.mss() as sct:
     # Part of the screen to capture
